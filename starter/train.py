@@ -14,6 +14,7 @@ import argparse
 import time
 
 import torch
+import math
 
 from model import GPT, Config
 import tokenizer as tokenizer_mod
@@ -21,6 +22,20 @@ import tokenizer as tokenizer_mod
 MAX_STEPS = 2000
 MAX_PARAMS = 2_000_000
 
+def get_lr(step, max_steps, peak_lr):
+    warmup_steps = 100
+    min_lr = peak_lr * 0.1
+
+    # Linear warmup
+    if step <= warmup_steps:
+        return peak_lr * step / warmup_steps
+
+    # Cosine decay
+    progress = (step - warmup_steps) / (max_steps - warmup_steps)
+    progress = min(progress, 1.0)
+
+    cosine = 0.5 * (1.0 + math.cos(math.pi * progress))
+    return min_lr + cosine * (peak_lr - min_lr)
 
 def get_batch(ids, block, batch, device):
     ix = torch.randint(len(ids) - block - 1, (batch,))
@@ -64,6 +79,9 @@ def main():
     t0 = time.time()
     losses = []
     for step in range(1, args.steps + 1):
+        lr = get_lr(step, args.steps, args.lr)
+        for param_group in opt.param_groups:
+            param_group["lr"] = lr
         x, y = get_batch(ids, cfg.block_size, args.batch, device)
         _, loss = model(x, y)
         opt.zero_grad(set_to_none=True)
