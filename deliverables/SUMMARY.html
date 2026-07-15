@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Plivo LLM Assignment Summary</title>
+<style>
+body{
+    font-family:Arial,Helvetica,sans-serif;
+    max-width:900px;
+    margin:40px auto;
+    line-height:1.6;
+}
+table{
+    border-collapse:collapse;
+    width:100%;
+}
+td,th{
+    border:1px solid #ccc;
+    padding:8px;
+}
+th{
+    background:#f3f3f3;
+}
+h1,h2{
+    color:#222;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Plivo AI/ML Assignment – LLM Track</h1>
+
+<h2>Objective</h2>
+
+<p>
+Improve the provided GPT baseline under a fixed parameter budget while keeping the evaluation interface unchanged.
+</p>
+
+<h2>Approach</h2>
+
+<p>
+The work followed an iterative experimental methodology. Rather than modifying multiple components simultaneously, individual architectural and optimization changes were evaluated independently whenever possible.
+</p>
+
+<h2>Experiments Performed</h2>
+
+<table>
+
+<tr>
+<th>Run</th>
+<th>Main Change</th>
+<th>Outcome</th>
+</tr>
+
+<tr>
+<td>0</td>
+<td>Baseline</td>
+<td>Reference</td>
+</tr>
+
+<tr>
+<td>1</td>
+<td>AdamW + Weight Decay + Gradient Clipping</td>
+<td>Improved BPB</td>
+</tr>
+
+<tr>
+<td>2</td>
+<td>Warmup + Cosine Scheduler</td>
+<td>Performance Degraded (Rejected)</td>
+</tr>
+
+<tr>
+<td>3</td>
+<td>Weight Tying + Increased Model Capacity</td>
+<td>Best Performing Configuration</td>
+</tr>
+
+<tr>
+<td>4</td>
+<td>Initialization / Final Optimization</td>
+<td>Final Submitted Model</td>
+</tr>
+
+</table>
+
+<h2>Final Model</h2>
+
+<ul>
+<li>AdamW Optimizer</li>
+<li>Weight Decay = 0.01</li>
+<li>Gradient Clipping</li>
+<li>Weight Tying Enabled</li>
+<li>Scaled Embedding Dimension</li>
+<li>GPT-style Initialization</li>
+</ul>
+
+<h2>Engineering Decisions</h2>
+
+<p>
+A tokenizer redesign was considered because byte-level UTF-8 tokenization is inefficient for multilingual text. However, preserving full compatibility with the supplied evaluation interface for arbitrary UTF-8 input was prioritized. The final submission therefore focuses on optimization and architectural improvements while maintaining complete compatibility with the provided evaluator.
+</p>
+
+<h2>Final Result</h2>
+
+<table>
+
+<tr>
+<th>Metric</th>
+<th>Value</th>
+</tr>
+
+<tr>
+<td>Final BPB</td>
+<td><b>2.3489</b></td>
+</tr>
+
+
+</table>
+
+<p>
+The submitted checkpoint corresponds to the best-performing model obtained during experimentation.
+</p>
+
+</body>
+</html>
