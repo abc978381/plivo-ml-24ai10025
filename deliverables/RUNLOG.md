@@ -70,3 +70,59 @@ The hypothesis is supported. AdamW with weight decay and gradient clipping provi
 ## Evaluation Output
 {"bpb": 2.3531, "n_params": 1339840, "steps": 2000, "tokens_in_eval": 159225, "tokens_scored": 159224}
 
+## Run 2 – Warmup + Cosine Learning Rate Scheduler
+
+### Hypothesis
+Introducing a linear warmup followed by cosine learning rate decay would improve convergence within the fixed 2000-step budget by stabilizing early optimization and enabling finer parameter updates towards the end of training.
+
+### Changes
+- Added 100-step linear warmup.
+- Added cosine annealing schedule reducing the learning rate to 10% of the peak value.
+- Retained all Run 1 optimization changes (AdamW, weight decay, gradient clipping).
+
+### Results
+
+| Metric | Run 1 | Run 2 |
+|--------|-------:|-------:|
+| BPB | **2.3531** | **2.5493** |
+
+### Observations
+- Training started considerably slower due to the warmup.
+- Although the training process remained stable, the final evaluation BPB degraded significantly.
+- Under the strict 2000-step training limit, the scheduler reduced the effective optimization progress.
+
+### Conclusion
+The hypothesis was **not supported**. The warmup and cosine schedule negatively impacted evaluation performance within the limited training budget. This modification was reverted, and subsequent experiments continue from the Run 1 configuration.
+
+### Evaluation Output:
+{"bpb": 2.5493, "n_params": 1339840, "steps": 2000, "tokens_in_eval": 159225, "tokens_scored": 159224}
+
+## Run 3 – Weight Tying + Increased Model Capacity
+
+### Hypothesis
+Weight tying improves parameter efficiency by sharing the input embedding and output projection weights. The resulting parameter savings can be reinvested into increasing model capacity while remaining below the 2M parameter limit, improving language modeling performance.
+
+### Changes
+- Enabled weight tying.
+- Increased embedding dimension, resulting in a total model size of 1,853,568 parameters.
+- Retained Run 1 optimization improvements (AdamW, weight decay = 0.01, gradient clipping = 1.0).
+
+### Results
+
+| Metric | Run 1 | Run 3 |
+|--------|-------:|-------:|
+| BPB | 2.3531 | **2.3489** |
+| Parameters | 1,339,840 | **1,853,568** |
+| Final Training Loss | 1.7141 | **1.6851** |
+
+### Observations
+- Increasing model capacity produced a lower final training loss.
+- Evaluation BPB improved further while remaining within the parameter budget.
+- Weight tying allowed better utilization of the available parameter budget without increasing inference complexity.
+
+### Conclusion
+The hypothesis is supported. Increasing model capacity together with weight tying produced the best validation performance so far and becomes the new baseline for subsequent experiments.
+
+## Evaluation Output: 
+{"bpb": 2.3489, "n_params": 1853568, "steps": 2000, "tokens_in_eval": 159225, "tokens_scored": 159224}
+
